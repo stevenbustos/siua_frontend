@@ -1,0 +1,17 @@
+version: '3'
+services:
+  siua-frontend:
+    container_name: siua-frontend
+    build: .
+    restart: unless-stopped
+    environment:
+      VUE_APP_KEY_HEADER_NAME: '${VUE_APP_KEY_HEADER_NAME}'
+      VUE_APP_KEY_HEADER_CONTENT: '${VUE_APP_KEY_HEADER_CONTENT}'
+      VUE_APP_USER_HEADER_NAME: '${VUE_APP_USER_HEADER_NAME}'
+      VUE_APP_PASS_HEADER_NAME: '${VUE_APP_PASS_HEADER_NAME}'
+      VUE_APP_TOKEN_HEADER_NAME: '${VUE_APP_TOKEN_HEADER_NAME}'
+      VUE_APP_MODULE_HEADER_NAME: '${VUE_APP_MODULE_HEADER_NAME}'
+      VUE_APP_PERMIT_HEADER_NAME: '${VUE_APP_PERMIT_HEADER_NAME}'
+      VUE_APP_API_IP: 'http://${VUE_APP_API_IP}:10000'
+    ports:
+      - 8080:8080

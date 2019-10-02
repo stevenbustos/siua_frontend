@@ -1,0 +1,51 @@
+{
+    "name": "siua-front",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "build": "vue-cli-service build",
+        "lint": "vue-cli-service lint",
+        "serve": "vue-cli-service serve",
+        "server": "serve -s dist -l 8080 --debug"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^1.2.10",
+        "@fortawesome/free-brands-svg-icons": "^5.6.1",
+        "@fortawesome/free-regular-svg-icons": "^5.6.1",
+        "@fortawesome/free-solid-svg-icons": "^5.6.1",
+        "@fortawesome/vue-fontawesome": "^0.1.3",
+        "@riophae/vue-treeselect": "^0.3.0",
+        "axios": "^0.18.1",
+        "bootstrap": "^4.3.1",
+        "bootstrap-vue": "^2.0.2",
+        "jquery": "^3.4.1",
+        "js-sha512": "^0.8.0",
+        "qs": "^6.6.0",
+        "sha256": "^0.2.0",
+        "vue": "^2.5.21",
+        "vue-axios": "^2.1.4",
+        "vue-frame": "^1.0.7",
+        "vue-js-modal": "^1.3.27",
+        "vue-multiselect": "^2.1.3",
+        "vue-popperjs": "^1.6.1",
+        "vue-router": "^3.0.2",
+        "vue-select": "^2.5.1",
+        "vue-session": "^1.0.0",
+        "vue-sweetalert2": "^1.6.3",
+        "vuelidate": "^0.7.4",
+        "vuex": "^3.0.1",
+        "vuex-router-sync": "^2.1.1"
+    },
+    "devDependencies": {
+        "@fortawesome/fontawesome-free": "^5.6.1",
+        "@vue/cli-plugin-babel": "^3.2.0",
+        "@vue/cli-plugin-eslint": "^3.2.1",
+        "@vue/cli-service": "^3.2.0",
+        "vue-template-compiler": "^2.5.21"
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not ie <= 8"
+    ]
+}

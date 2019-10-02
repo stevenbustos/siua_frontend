@@ -1,0 +1,228 @@
+<template>
+  <div class="container-fluid">
+    <div style="margin:40px;background-color:rgba(255, 255, 255, 0.7);">
+      <div class="row">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/modulos">Módulos</a></li>
+            <li class="breadcrumb-item"><a v-bind:href="module_url">{{module_name}}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Actualizar Módulo</li>
+          </ol>
+        </nav>
+      </div>
+      <div class="row">
+        <div class="col-md-8 offset-md-2" style="margin-bottom:80px;">
+          <div class="row">
+            <div class="col">
+              <button class="btn btn-primary" type="button" @click="cancel()" style="background:#003e1e;border-color:#003e1e;">
+                <font-awesome-icon icon="arrow-left" size="lg"></font-awesome-icon>
+              </button>
+            </div>
+          </div>
+          <div>&nbsp;</div>
+          <div class="row justify-content-center">
+            <div class="col-5 align-self-center">
+              <form @submit.prevent="submit" novalidate>
+                <div class="form-group">
+                  <label for="moduleName">Nombre del módulo:</label>
+                  <input type="text" class="form-control" id="moduleName" aria-describedby="moduleName" :placeholder="module_name" readonly>
+                </div>
+                <div class="form-group" :class="{ 'form-group--error': $v.module_description.$error }">
+                  <label for="moduleDescription">Descripción:</label>
+                  <textarea v-model.trim="$v.module_description.$model" class="form-control" aria-label="moduleDescription"
+                    placeholder="Descripción" :rows="6" :max-rows="10"></textarea>
+                    <div class="alert alert-danger" role="alert" v-if="$v.module_description.$dirty && !$v.module_description.required">Es requerida una descripción</div>
+                </div>
+                <div class="form-group" :class="{ 'form-group--error': $v.module_permits.$error }">
+                  <label for="modulePermits">Permisos del módulo:</label>
+                  <multiselect v-model.trim="$v.module_permits.$model" :options="permits" :multiple="true" :close-on-select="true" :clear-on-select="false" :hide-selected="true" :preserve-search="true" placeholder="Seleccione los permisos del módulo" label="name" track-by="_id" :preselect-first="false">
+                  </multiselect>
+                  <div class="alert alert-danger" role="alert" v-if="$v.module_permits.$dirty && !$v.module_permits.required">Es requerido mínimo un permiso</div>
+                </div>
+                <div class="form-group" :class="{ 'form-group--error': $v.module_code.$error }">
+                  <label for="moduleCode">Código del módulo:</label>
+                  <input type="number" v-model.trim="$v.module_code.$model" class="form-control" id="moduleCode" aria-describedby="moduleCode" placeholder="Código">
+                  <div class="alert alert-danger" role="alert" v-if="$v.module_code.$dirty && !$v.module_code.required">Es requerido un código</div>
+                </div>
+                <div class="form-group" :class="{ 'form-group--error': $v.module_state.$error }">
+                  <label for="moduleState">Estado del módulo:</label>
+                  <multiselect v-model.trim="$v.module_state.$model" :options="states" track-by="name" label="name" :searchable="false" :close-on-select="true" :show-labels="true" placeholder="Escoja un estado">
+                  </multiselect>
+                  <div class="alert alert-danger" role="alert" v-if="$v.module_state.$dirty && !$v.module_state.required">Es requerido un estado</div>
+                </div>
+                <div>&nbsp;</div>
+                <div class="row justify-content-center">
+                  <div class="col-4 text-center">
+                    <button class="btn btn-primary" type="submit" :disabled="submitting" style="background:#003e1e;border-color:#003e1e;">
+                      <font-awesome-icon icon="save" size="lg"></font-awesome-icon>
+                      Guardar
+                    </button>
+                  </div>
+                  <div class="col-4 text-center">
+                    <button type="button" @click="cancel()" class="btn btn-primary" style="background:#003e1e;border-color:#003e1e;">
+                      <font-awesome-icon icon="times-circle" size="lg"></font-awesome-icon>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+                <div>&nbsp;</div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import Multiselect from 'vue-multiselect'
+import {axios} from '../../helpers/axios';
+import { required } from 'vuelidate/lib/validators'
+var API_IP = process.env.VUE_APP_API_IP
+
+export default {
+  components: {
+    Multiselect
+  },
+  data () {
+    return {
+      module_permits: [],
+      mod_permits: [],
+      module_state: "",
+      module_state_get: "",
+      module_name: "",
+      permits: [],
+      states: [
+        { name: "Activo", activo: "true" },
+        { name: "Inactivo", activo: "false" }
+      ],
+      module_description: "",
+      module_code: "",
+      module_url: "",
+      module_auditoria: {},
+      submitting: false
+    }
+  },
+  validations: {
+    module_state: {
+      required
+    },
+    module_description: {
+      required
+    },
+    module_code: {
+      required
+    },
+    module_permits: {
+      required
+    }
+  },
+  mounted () {
+    axios
+    .get(API_IP+"/permit/")
+    .then(response => {
+      for(var k in response.data.data){
+        var per = {}
+        if(response.data.data[k].activo == true ){
+          per["name"] = response.data.data[k].nombre;
+          per["_id"] = response.data.data[k]._id;
+          this.permits.push(per);
+        }
+      }
+    });
+
+    axios
+    .get(API_IP+'/module/'+this.$route.params.id)
+    .then(response => {
+      this.module_auditoria = response.data.data.auditoria
+      this.module_name = response.data.data.nombre
+      for (var k in response.data.data.permisos){
+        var per = {}
+        per["name"] = response.data.data.permisos[k].nombre
+        per["_id"] = response.data.data.permisos[k]._id
+        this.module_permits.push(per)
+      }
+      this.module_state = response.data.data.activo;
+      response.data.data.activo? this.module_state_get="Activo" : this.module_state_get="Inactivo";
+      this.module_description = response.data.data.descripcion
+      this.module_code = response.data.data.codigo
+      this.module_id = response.data.data._id
+      this.module_url = "/modulos/"+response.data.data._id
+    })
+
+  },
+  methods: {
+    submit() {
+      this.$v.$touch()
+      if (this.$v.$invalid) {
+        this.$swal({
+          title: 'Error!',
+          text: 'Debe llenar campos necesarios en el formulario',
+          type: 'error',
+          confirmButtonText: 'Cerrar'
+        });
+      } else {
+        this.submitting = true;
+        axios
+        .put(API_IP+"/module/"+this.$route.params.id, {
+          auditoria: this.module_auditoria,
+          activo: this.module_state.activo,
+          _id: this.module_id,
+          nombre: this.module_name,
+          descripcion: this.module_description,
+          codigo: parseInt(this.module_code),
+          permisos: this.module_permits
+        })
+        .then(response => {
+          console.log(response);
+          this.$swal({
+            title: 'Exito!',
+            text: 'Se actualizo el módulo satisfactoriamente.',
+            type: 'success',
+            confirmButtonText: 'Aceptar'
+          }).then((result) => {
+            if (result.value) {
+              this.submitting = false;
+              this.$router.push({ name: 'showmodule', params: { id: this.module_id} });
+            }
+          });
+        })
+        .catch(error => {
+          console.log(error);
+          this.$swal({
+            title: 'Error!',
+            text: error.response.data.error.msg,
+            type: 'error',
+            confirmButtonText: 'Cerrar'
+          });
+          this.submitting = false;
+        });
+      }
+    },
+    cancel(){
+      this.$v.$reset()
+      this.$swal({
+        title: 'Espere',
+        text: '¿Esta seguro que quiere cancelar la operación?',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Si',
+        cancelButtonText: 'No',
+      }).then((result) => {
+        if (result.value) {
+          this.$swal({
+            title: 'Cancelado',
+            type: 'success'
+          }).then((result) => {
+            if (result.value) {
+              this.$router.push({ name: 'showmodule', params: { id: this.module_id} });
+            }
+          });
+        }
+      });
+    }
+  }
+}
+</script>
